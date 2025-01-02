@@ -1,8 +1,9 @@
 use logger::LogWriter;
 use nt_analyzer::Analyzer;
-use nt_cmd::config;
+use nt_config::config;
 use nt_io::PacketIO;
 use nt_modifier::Modifier;
+use nt_ruleset::engine::Engine as RulesetEngine;
 use nt_ruleset::expr_rule::ExprRuleset;
 use std::sync::Arc;
 use tokio::sync::watch::Sender;
@@ -24,6 +25,7 @@ pub struct ServerConfig {
     pub modifiers: Vec<Arc<dyn Modifier>>,
     pub config: Arc<config::CliConfig>,
     pub rule_set: Option<Arc<ExprRuleset>>,
+    pub ruleset_engine: RulesetEngine,
     pub ruleset_file: String,
     pub io_impl: Option<Arc<dyn PacketIO>>,
 

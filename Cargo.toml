@@ -4,6 +4,7 @@ members = [
   "analyzer",
   "apiserver",
   "cmd",
+  "config",
   "engine",
   "io",
   "modifier",
@@ -36,3 +37,4 @@ nt-engine = { package = "engine", path = 'engine' }
 nt-io = { package = "io", path = 'io' }
 nt-modifier = { package = "modifier", path = 'modifier' }
 nt-ruleset = { package = "ruleset", path = 'ruleset' }
+nt-config = { package = "config", path = 'config' }

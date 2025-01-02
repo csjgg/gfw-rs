@@ -6,6 +6,7 @@ use clap::Parser;
 use notify::{RecommendedWatcher, RecursiveMode, Watcher};
 use nt_analyzer::Analyzer;
 use nt_modifier::Modifier;
+use nt_ruleset::engine::Engine as RulesetEngine;
 use nt_ruleset::expr_rule::read_expr_rules_from_file;
 use std::net::SocketAddr;
 use std::sync::Arc;
@@ -135,15 +136,23 @@ async fn main() {
     ];
     let modifiers: Vec<Arc<dyn Modifier>> =
         vec![Arc::new(nt_modifier::udp::dns::DNSModifier::new())];
-    let rhai_engine = Arc::new(rhai::Engine::new());
-    let ruleset =
-        nt_ruleset::expr_rule::compile_expr_rules(raw_rs, &analyzers, &modifiers, rhai_engine);
+
+    let config = Arc::new(nt_config::config::CliConfig::default());
+    let ruleset_engine = RulesetEngine::new(&config.ruleset.geoip, &config.ruleset.geosite);
+
+    let ruleset = nt_ruleset::expr_rule::compile_expr_rules(
+        raw_rs,
+        &analyzers,
+        &modifiers,
+        ruleset_engine.clone(),
+    );
     let log_writer = LogWriter::new(100);
     let app = app.layer(Extension(Arc::new(RwLock::new(ServerConfig {
         log_writer: log_writer.clone(),
         analyzers,
         modifiers,
-        config: Arc::new(nt_cmd::config::CliConfig::default()),
+        ruleset_engine,
+        config,
         ruleset_file: cli.ruleset_file.clone(),
         config_tx: config_tx.clone(),
         io_impl: None,

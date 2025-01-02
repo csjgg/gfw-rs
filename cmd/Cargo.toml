@@ -11,6 +11,7 @@ clap.workspace = true
 nt-ruleset.workspace = true
 serde-aux.workspace = true
 nt-engine.workspace = true
+nt-config.workspace = true
 tracing.workspace = true
 tracing-subscriber.workspace = true
 nt-io.workspace = true
