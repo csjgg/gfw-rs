@@ -218,9 +218,11 @@ impl TCPStream for HTTPStream {
             (cancelled, self.resp_done) = (*lsm).write().unwrap().run(self);
 
             if self.resp_updated {
+                let mut resp = PropMap::new();
+                resp.insert("resp".to_string(), Arc::new(self.resp_map.clone()));
                 update = Some(PropUpdate {
                     update_type: PropUpdateType::Merge,
-                    map: self.resp_map.clone(),
+                    map: resp,
                 });
                 self.resp_updated = false;
             }
@@ -233,9 +235,11 @@ impl TCPStream for HTTPStream {
             (cancelled, self.req_done) = (*lsm).write().unwrap().run(self);
 
             if self.req_updated {
+                let mut req = PropMap::new();
+                req.insert("req".to_string(), Arc::new(self.req_map.clone()));
                 update = Some(PropUpdate {
                     update_type: PropUpdateType::Merge,
-                    map: self.req_map.clone(),
+                    map: req,
                 });
                 self.req_updated = false;
             }
@@ -296,21 +300,39 @@ mod tests {
             let result_map = a.unwrap().map; // 获取实际返回的 `map`
 
             // Check method
-            let method = result_map.get("method").unwrap();
+            let method = result_map
+                .get("req")
+                .unwrap()
+                .downcast_ref::<PropMap>()
+                .unwrap()
+                .get("method")
+                .unwrap();
             let want_method = want.get("method").unwrap();
             let method = method.downcast_ref::<String>().unwrap();
             let want_method = want_method.downcast_ref::<String>().unwrap();
             assert_eq!(method, want_method);
 
             // Check path
-            let path = result_map.get("path").unwrap();
+            let path = result_map
+                .get("req")
+                .unwrap()
+                .downcast_ref::<PropMap>()
+                .unwrap()
+                .get("path")
+                .unwrap();
             let want_path = want.get("path").unwrap();
             let path = path.downcast_ref::<String>().unwrap();
             let want_path = want_path.downcast_ref::<String>().unwrap();
             assert_eq!(path, want_path);
 
             // Check version
-            let version = result_map.get("version").unwrap();
+            let version = result_map
+                .get("req")
+                .unwrap()
+                .downcast_ref::<PropMap>()
+                .unwrap()
+                .get("version")
+                .unwrap();
             let want_version = want.get("version").unwrap();
             let version = version.downcast_ref::<String>().unwrap();
             let want_version = want_version.downcast_ref::<String>().unwrap();
@@ -338,21 +360,39 @@ mod tests {
         let result_map = a.unwrap().map;
         let want = input.1;
         // Check method
-        let method = result_map.get("method").unwrap();
+        let method = result_map
+            .get("req")
+            .unwrap()
+            .downcast_ref::<PropMap>()
+            .unwrap()
+            .get("method")
+            .unwrap();
         let want_method = want.get("method").unwrap();
         let method = method.downcast_ref::<String>().unwrap();
         let want_method = want_method.downcast_ref::<String>().unwrap();
         assert_eq!(method, want_method);
 
         // Check path
-        let path = result_map.get("path").unwrap();
+        let path = result_map
+            .get("req")
+            .unwrap()
+            .downcast_ref::<PropMap>()
+            .unwrap()
+            .get("path")
+            .unwrap();
         let want_path = want.get("path").unwrap();
         let path = path.downcast_ref::<String>().unwrap();
         let want_path = want_path.downcast_ref::<String>().unwrap();
         assert_eq!(path, want_path);
 
         // Check version
-        let version = result_map.get("version").unwrap();
+        let version = result_map
+            .get("req")
+            .unwrap()
+            .downcast_ref::<PropMap>()
+            .unwrap()
+            .get("version")
+            .unwrap();
         let want_version = want.get("version").unwrap();
         let version = version.downcast_ref::<String>().unwrap();
         let want_version = want_version.downcast_ref::<String>().unwrap();
@@ -360,7 +400,13 @@ mod tests {
 
         // Check headers
         let expected_headers = want.get("headers").unwrap();
-        let headers = result_map.get("headers").unwrap();
+        let headers = result_map
+            .get("req")
+            .unwrap()
+            .downcast_ref::<PropMap>()
+            .unwrap()
+            .get("headers")
+            .unwrap();
 
         // Extract the headers HashMap from Arc<dyn Any>
         let result_headers = headers.downcast_ref::<PropMap>().unwrap();
